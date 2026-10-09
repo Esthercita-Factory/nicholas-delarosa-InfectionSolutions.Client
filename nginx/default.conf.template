@@ -1,0 +1,50 @@
+# ${API_UPSTREAM} lo reemplaza envsubst al arrancar el contenedor (por defecto http://api:8080).
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    # DNS interno de Docker: el nombre "api" se resuelve en cada peticion, asi Nginx
+    # arranca aunque la API todavia no exista y sigue funcionando si se recrea.
+    resolver 127.0.0.11 valid=10s ipv6=off;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 1024;
+
+    # /api/... va a la API tal cual (proxy_pass con variable reenvia la URI original
+    # completa). ^~ evita que la regla de archivos estaticos de abajo se quede con una
+    # ruta de la API que termine en .svg o .png.
+    location ^~ /api/ {
+        set $api_upstream ${API_UPSTREAM};
+        proxy_pass $api_upstream;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+        client_max_body_size 5m;
+    }
+
+    # Archivos con hash en el nombre (main-XXXX.js): se pueden cachear un año.
+    location ~* \.(?:js|css|woff2?|svg|png|ico)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options nosniff always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
+        add_header X-Frame-Options DENY always;
+        try_files $uri =404;
+    }
+
+    # SPA: cualquier ruta del portal (/catalogo, /compras/123) devuelve index.html,
+    # que nunca se cachea para que un despliegue nuevo se vea de inmediato.
+    location / {
+        try_files $uri $uri/ /index.html;
+        # add_header dentro de un location reemplaza los heredados: van todos aqui.
+        add_header Cache-Control "no-cache";
+        add_header X-Content-Type-Options nosniff always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
+        add_header X-Frame-Options DENY always;
+    }
+}

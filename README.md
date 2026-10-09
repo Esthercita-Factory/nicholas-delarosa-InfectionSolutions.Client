@@ -2,7 +2,7 @@
 
 Aplicación web en **Angular 21** donde los clientes se registran, inician sesión, ven el catálogo, arman su
 carrito, compran y descargan el comprobante. Es el frontend del sistema InfectionSolutions: consume su API REST
-(`InfectionSolutions.Api`, en el repositorio del backend) y no toca la base de datos.
+(`InfectionSolutions.Api`, en el [repositorio del backend](https://github.com/Esthercita-Factory/nicholas-delarosa-InfectionSolutions)) y no toca la base de datos.
 
 ## Requisitos
 
@@ -26,6 +26,24 @@ La API ya permite `http://localhost:4200` en CORS (`Cors:AllowedOrigins`). La di
 |---|---|---|
 | `environment.development.ts` | `npm start` | `http://localhost:5120/api` |
 | `environment.ts` | `npm run build` | `/api` (mismo dominio; en Docker lo resuelve el proxy) |
+
+## Docker
+
+La imagen tiene dos etapas: Node compila el build de producción y **Nginx** (sin root, puerto 8080) lo sirve.
+Nginx también reenvía `/api/*` a la API (`API_UPSTREAM`, por defecto `http://api:8080`), así que el portal y
+la API quedan en el mismo origen y no hace falta CORS.
+
+```bash
+docker build -t infectionsolutions-client .
+docker run -p 8082:8080 -e API_UPSTREAM=http://host.docker.internal:5120 infectionsolutions-client
+```
+
+En el sistema completo no hace falta construirla a mano: el `docker-compose.yml` del
+[repositorio del backend](https://github.com/Esthercita-Factory/nicholas-delarosa-InfectionSolutions) la
+levanta junto con la base de datos, la API y el panel.
+
+Cada push a `main` ejecuta GitHub Actions (`.github/workflows/docker.yml`): corre `npm test` y, si pasa,
+publica la imagen en `ghcr.io/esthercita-factory/nicholas-delarosa-infectionsolutions.client`.
 
 ## Qué hace
 
