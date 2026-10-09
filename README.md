@@ -1,0 +1,78 @@
+# InfectionSolutions.Client · Portal de clientes
+
+Aplicación web en **Angular 21** donde los clientes se registran, inician sesión, ven el catálogo, arman su
+carrito, compran y descargan el comprobante. Es el frontend del sistema InfectionSolutions: consume su API REST
+(`InfectionSolutions.Api`, en el repositorio del backend) y no toca la base de datos.
+
+## Requisitos
+
+- Node.js 22.12 o superior.
+- La API de InfectionSolutions corriendo en http://localhost:5120. Desde el repositorio del backend:
+  `dotnet run --project Src/InfectionSolutions.Api`.
+
+## Comandos
+
+```bash
+npm install     # dependencias (versiones exactas, ver package.json)
+npm start       # servidor de desarrollo en http://localhost:4200
+npm test        # pruebas unitarias (Vitest)
+npm run build   # build de producción en dist/
+```
+
+La API ya permite `http://localhost:4200` en CORS (`Cors:AllowedOrigins`). La dirección de la API está en
+`src/environments/`:
+
+| Archivo | Cuándo se usa | `apiUrl` |
+|---|---|---|
+| `environment.development.ts` | `npm start` | `http://localhost:5120/api` |
+| `environment.ts` | `npm run build` | `/api` (mismo dominio; en Docker lo resuelve el proxy) |
+
+## Qué hace
+
+- **Registro e ingreso** (`/registro`, `/ingresar`). El registro repite las validaciones de la API (documento,
+  edad, teléfono, política de contraseña con indicador en vivo) y muestra junto a cada campo los errores que
+  devuelve la API, como un documento ya registrado. Una cuenta de administrador no puede entrar al portal.
+- **Sesión con JWT**: el token se guarda en `localStorage` y el interceptor lo envía como
+  `Authorization: Bearer …` solo a la API. Cuando el token vence, la sesión se cierra sola: por un temporizador
+  o por un 401 de la API. Luego vuelve al login con el aviso "Tu sesión venció" y, al ingresar, a la página
+  donde estaba.
+- **Catálogo** (`/catalogo`): búsqueda sin mayúsculas ni tildes, filtro por categoría y paginación. El filtro
+  queda en la URL. Cada tarjeta muestra el precio sin IVA y con IVA, y el stock disponible.
+- **Carrito**: panel lateral y página `/carrito`. Respeta el stock, se guarda por cliente y calcula subtotal,
+  IVA (19 %) y total con el mismo redondeo de la API (en centavos enteros), así que lo que se ve es lo que se
+  cobra.
+- **Compra**: `POST /api/me/sales`. La confirmación dice si el comprobante salió por correo
+  (`receiptEmailSent`) y permite descargar el PDF.
+- **Mis compras** (`/mis-compras`): historial con detalle y descarga del comprobante.
+- Diseño adaptativo con barra de pestañas en celular, modo claro y oscuro, y animaciones que respetan
+  `prefers-reduced-motion`.
+
+Solo usa endpoints del rol Cliente: `/api/auth/*`, `GET /api/products`, `GET /api/products/categories` y
+`/api/me/sales/*`.
+
+## Estructura
+
+```
+src/app/
+├── router/app.routes.ts        Rutas (ingresar, registro y el portal protegido por authGuard)
+├── Guards/auth.guard.ts        authGuard (exige sesión vigente) y guestGuard (login/registro)
+├── Interceptors/               Agrega el Bearer y maneja el 401
+├── Models/api.models.ts        Tipos de las respuestas de la API
+├── Services/                   auth, cart, catalog, orders, toast, theme
+└── Views/
+    ├── Auth/                   Login, Register y su layout
+    ├── Layout/Shell            Encabezado, menú, barra de pestañas y pie
+    ├── Catalog/                Catálogo y tarjeta de producto
+    ├── Cart/                   Panel del carrito y checkout
+    ├── Orders/                 Mis compras y detalle/confirmación
+    └── Shared/                 Íconos, avisos, selector de cantidad, formatos de dinero y fecha
+```
+
+## Pruebas
+
+`npm test` corre 17 pruebas con Vitest:
+
+- **Carrito**: totales idénticos a los de la API, redondeo del IVA, límite de stock y sincronización con el catálogo.
+- **Sesión**: guarda el token de un cliente, rechaza administradores, descarta una sesión vencida y cierra sesión.
+- **Interceptor**: agrega el Bearer solo a la API, ignora el login y convierte un 401 en "sesión vencida".
+- **Guards**: protegen las rutas y recuerdan la página a la que se quería ir.

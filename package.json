@@ -1,0 +1,33 @@
+{
+  "name": "infectionsolutions-client",
+  "version": "1.0.0",
+  "description": "Portal de clientes de InfectionSolutions (Angular). Consume la API de Src/InfectionSolutions.Api.",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test --watch=false"
+  },
+  "private": true,
+  "packageManager": "npm@11.15.0",
+  "dependencies": {
+    "@angular/common": "21.2.24",
+    "@angular/compiler": "21.2.24",
+    "@angular/core": "21.2.24",
+    "@angular/forms": "21.2.24",
+    "@angular/platform-browser": "21.2.24",
+    "@angular/router": "21.2.24",
+    "rxjs": "7.8.2",
+    "tslib": "2.8.1"
+  },
+  "devDependencies": {
+    "@angular/build": "21.2.26",
+    "@angular/cli": "21.2.26",
+    "@angular/compiler-cli": "21.2.24",
+    "jsdom": "28.1.0",
+    "prettier": "3.8.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}
