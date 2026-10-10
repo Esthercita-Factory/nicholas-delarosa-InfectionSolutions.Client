@@ -8,8 +8,14 @@ server {
     # arranca aunque la API todavia no exista y sigue funcionando si se recrea.
     resolver 127.0.0.11 valid=10s ipv6=off;
 
+    # El Nginx del servidor reenvia en HTTP/1.0 y Nginx por defecto solo comprime HTTP/1.1:
+    # sin gzip_http_version 1.0 el JavaScript llegaba sin comprimir (358 KiB en vez de ~90).
     gzip on;
-    gzip_types text/css application/javascript application/json image/svg+xml;
+    gzip_http_version 1.0;
+    gzip_proxied any;
+    gzip_vary on;
+    gzip_comp_level 6;
+    gzip_types text/plain text/markdown text/css application/javascript application/json image/svg+xml;
     gzip_min_length 1024;
 
     # /api/... va a la API tal cual (proxy_pass con variable reenvia la URI original
@@ -37,10 +43,21 @@ server {
         try_files $uri =404;
     }
 
-    # SPA: cualquier ruta del portal (/catalogo, /compras/123) devuelve index.html,
-    # que nunca se cachea para que un despliegue nuevo se vea de inmediato.
+    # Cualquier otro archivo (robots.txt, llms.txt, /.well-known/...): si no existe es un 404
+    # de verdad. Sin esto el fallback del SPA devolvia index.html con 200 y los rastreadores
+    # lo leian como un robots.txt o un manifiesto invalido.
+    location ~ \.[A-Za-z0-9]+$ {
+        add_header X-Content-Type-Options nosniff always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
+        add_header X-Frame-Options DENY always;
+        try_files $uri =404;
+    }
+
+    # /ingresar y /registro existen como HTML prerenderizado (ingresar/index.html); el
+    # resto del portal (/catalogo, /compras/123) es la app sin prerender, index.csr.html.
+    # Ningun HTML se cachea, para que un despliegue nuevo se vea de inmediato.
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files $uri/index.html /index.csr.html;
         # add_header dentro de un location reemplaza los heredados: van todos aqui.
         add_header Cache-Control "no-cache";
         add_header X-Content-Type-Options nosniff always;

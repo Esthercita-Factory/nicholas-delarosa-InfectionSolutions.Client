@@ -44,7 +44,8 @@ import { IconComponent } from '../Shared/Icon.Component';
           </button>
 
           <div class="user">
-            <button type="button" class="user__btn" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-haspopup="menu">
+            <button type="button" class="user__btn" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-haspopup="menu"
+                    [attr.aria-label]="'Menú de la cuenta de ' + auth.firstName()">
               <span class="avatar" aria-hidden="true">{{ auth.initials() }}</span>
               <span class="user__name">{{ auth.firstName() }}</span>
               <app-icon name="chevronDown" [size]="16" />
@@ -88,7 +89,11 @@ import { IconComponent } from '../Shared/Icon.Component';
       </div>
     </footer>
 
-    <app-cart-drawer [open]="cartOpen()" (closed)="cartOpen.set(false)" />
+    <!-- El panel del carrito no se ve al entrar: se arma cuando el navegador queda libre,
+         asi no compite con el primer render del catalogo. -->
+    @defer (on idle) {
+      <app-cart-drawer [open]="cartOpen()" (closed)="cartOpen.set(false)" />
+    }
   `
 })
 export class ShellComponent {

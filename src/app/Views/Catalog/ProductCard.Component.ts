@@ -17,7 +17,7 @@ import { QtyStepperComponent } from '../Shared/QtyStepper.Component';
         <span class="product__sku">{{ product().sku }}</span>
       </div>
 
-      <h3 class="product__name">{{ product().name }}</h3>
+      <h2 class="product__name">{{ product().name }}</h2>
       @if (product().description) {
         <p class="product__desc">{{ product().description }}</p>
       }

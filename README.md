@@ -45,6 +45,23 @@ levanta junto con la base de datos, la API y el panel.
 Cada push a `main` ejecuta GitHub Actions (`.github/workflows/docker.yml`): corre `npm test` y, si pasa,
 publica la imagen en `ghcr.io/esthercita-factory/nicholas-delarosa-infectionsolutions.client`.
 
+## Rendimiento
+
+Puntajes de Lighthouse (móvil y escritorio) por encima de 90 en ingreso y catálogo. Lo que los sostiene:
+
+- **Ingreso y registro prerenderizados**: el build genera su HTML (`outputMode: "static"`,
+  `src/app/router/app.routes.server.ts`) y Angular lo hidrata. No hay servidor Node: Nginx sirve
+  `ingresar/index.html` y, para el resto de rutas, `index.csr.html`.
+- **Cada pantalla se carga bajo demanda** (`loadComponent`); el panel del carrito y las tarjetas fuera de
+  pantalla se arman con `@defer` (cuando el navegador está libre o al acercarse).
+- **Compresión gzip también en HTTP/1.0**: el Nginx del servidor reenvía en 1.0 y sin `gzip_http_version 1.0`
+  el JavaScript viajaba sin comprimir.
+- **Fuente Archivo servida desde el mismo dominio** (`public/fonts`), sin conexión extra a Google Fonts.
+- Animaciones de entrada solo con `transform` (nunca dejan texto semitransparente, así el contraste es el real)
+  y brillo de los esqueletos por el compositor.
+- `robots.txt` y `llms.txt` reales; cualquier otro archivo inexistente responde 404 (antes el fallback del SPA
+  devolvía la app con 200).
+
 ## Qué hace
 
 - **Registro e ingreso** (`/registro`, `/ingresar`). El registro repite las validaciones de la API (documento,

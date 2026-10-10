@@ -1,0 +1,20 @@
+# InfectionSolutions · Portal de clientes
+
+> Tienda en línea de materiales de construcción de InfectionSolutions (Barranquilla, Colombia).
+> Los clientes registrados consultan el catálogo con el stock real de la bodega, arman el carrito,
+> ven el IVA (19 %) y el total antes de confirmar, y reciben el comprobante en PDF por correo.
+
+El catálogo, el carrito y el historial de compras exigen iniciar sesión con una cuenta de cliente.
+
+## Páginas públicas
+
+- [Ingresar](https://infectionsolutions.clandev.com/ingresar): inicio de sesión de clientes.
+- [Crear cuenta](https://infectionsolutions.clandev.com/registro): registro con documento, nombre, correo y teléfono.
+
+## API
+
+- [Documentación de la API (Swagger)](https://services.infectionsolutions.clandev.com/swagger): endpoints REST con autenticación JWT.
+
+## Contacto
+
+- [Correo de ventas](mailto:i.s.infectionsolutions@gmail.com)

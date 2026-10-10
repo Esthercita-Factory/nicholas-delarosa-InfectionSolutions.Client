@@ -1,0 +1,10 @@
+# Portal de clientes de InfectionSolutions. Solo las pantallas de ingreso y registro
+# son publicas; el resto exige una cuenta de cliente.
+User-agent: *
+Allow: /ingresar
+Allow: /registro
+Allow: /llms.txt
+Disallow: /api/
+Disallow: /carrito
+Disallow: /mis-compras
+Disallow: /compras/

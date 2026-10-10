@@ -82,8 +82,18 @@ type Estado =
             </div>
           } @else {
             <div class="grid">
+              <!-- Las primeras tarjetas salen de una; el resto se arma al acercarse a la
+                   pantalla, asi el primer render (sobre todo en movil) es mas liviano. -->
               @for (p of d.items; track p.id; let i = $index) {
-                <app-product-card [product]="p" [style.--i]="i" />
+                @if (i < tarjetasInmediatas) {
+                  <app-product-card [product]="p" [style.--i]="i" />
+                } @else {
+                  @defer (on viewport) {
+                    <app-product-card [product]="p" />
+                  } @placeholder {
+                    <div class="product product--placeholder" aria-hidden="true"></div>
+                  }
+                }
               }
             </div>
 
@@ -122,6 +132,8 @@ export class CatalogComponent {
     return estado.kind === 'ready' ? estado.data : null;
   });
   protected readonly esqueletos = Array.from({ length: 6 }, (_, i) => i);
+  /** Tarjetas que se pintan de inmediato (la primera fila en escritorio). */
+  protected readonly tarjetasInmediatas = 4;
 
   protected readonly buscar$ = new Subject<string>();
   /** Al cambiar, se vuelve a pedir la misma pagina (boton "Reintentar"). */
