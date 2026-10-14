@@ -20,5 +20,11 @@ RUN npm run build
 FROM nginxinc/nginx-unprivileged:alpine AS final
 ENV API_UPSTREAM=http://api:8080
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
+# La imagen base trae su index.html ("Welcome to nginx!") y 50x.html. Como el portal no
+# tiene index.html en la raiz (la app sin prerender es index.csr.html), "/" mostraba la
+# bienvenida de Nginx en vez de abrir el portal: se vacia la carpeta antes de copiar.
+USER root
+RUN rm -rf /usr/share/nginx/html/*
+USER 101
 COPY --from=build /app/dist/infectionsolutions-client/browser /usr/share/nginx/html
 EXPOSE 8080
