@@ -43,6 +43,23 @@ describe('authInterceptor', () => {
     expect(backend.expectOne('https://fonts.googleapis.com/css2').request.headers.has('Authorization')).toBe(false);
   });
 
+  it('las rutas publicas de cuenta (recuperar, Google/GitHub) no llevan token ni cierran sesion', () => {
+    const logout = vi.spyOn(auth, 'logout');
+
+    http.post(`${API_URL}/auth/forgot-password`, {}).subscribe();
+    http.post(`${API_URL}/auth/external/exchange`, {}).subscribe({ error: () => {} });
+
+    expect(backend.expectOne(`${API_URL}/auth/forgot-password`).request.headers.has('Authorization')).toBe(false);
+    backend.expectOne(`${API_URL}/auth/external/exchange`).flush(null, { status: 401, statusText: 'Unauthorized' });
+    expect(logout).not.toHaveBeenCalled();
+  });
+
+  it('completar datos si lleva el token (la cuenta ya inicio sesion)', () => {
+    http.post(`${API_URL}/auth/complete-profile`, {}).subscribe();
+
+    expect(backend.expectOne(`${API_URL}/auth/complete-profile`).request.headers.get('Authorization')).toBe('Bearer jwt-vigente');
+  });
+
   it('ante un 401 cierra la sesion como vencida', () => {
     const logout = vi.spyOn(auth, 'logout').mockImplementation(() => {});
 

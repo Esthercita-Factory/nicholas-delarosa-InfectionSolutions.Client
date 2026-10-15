@@ -6,10 +6,11 @@ import { AuthService } from '../../Services/auth.service';
 import { ToastService } from '../../Services/toast.service';
 import { IconComponent } from '../Shared/Icon.Component';
 import { AuthLayoutComponent } from './AuthLayout.Component';
+import { SocialLoginComponent } from './SocialLogin.Component';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, AuthLayoutComponent, IconComponent],
+  imports: [ReactiveFormsModule, RouterLink, AuthLayoutComponent, IconComponent, SocialLoginComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-auth-layout>
@@ -23,9 +24,9 @@ import { AuthLayoutComponent } from './AuthLayout.Component';
         </div>
       }
 
-      @if (error()) {
+      @if (error() ?? externo(); as mensaje) {
         <div class="notice notice--error" role="alert">
-          <app-icon name="alert" [size]="18" /><span>{{ error() }}</span>
+          <app-icon name="alert" [size]="18" /><span>{{ mensaje }}</span>
         </div>
       }
 
@@ -47,11 +48,14 @@ import { AuthLayoutComponent } from './AuthLayout.Component';
             <span class="field__error">Escribe tu contraseña.</span>
           }
         </label>
+        <a routerLink="/recuperar" class="form-link">¿Olvidaste tu contraseña?</a>
 
         <button type="submit" class="btn btn--primary btn--block" [disabled]="sending()">
           @if (sending()) { <span class="spinner" aria-hidden="true"></span> Ingresando… } @else { Ingresar <app-icon name="arrowRight" [size]="18" /> }
         </button>
       </form>
+
+      <app-social-login [volver]="destino()" />
 
       <p class="form-switch">¿Primera vez? <a routerLink="/registro">Crea tu cuenta</a></p>
     </app-auth-layout>
@@ -65,6 +69,8 @@ export class LoginComponent {
   /** Query params (?sesion=vencida&volver=/carrito), enlazados por withComponentInputBinding. */
   readonly sesion = input<string>();
   readonly volver = input<string>();
+  /** Mensaje cuando el inicio con Google/GitHub no se pudo completar (?externo=...). */
+  readonly externo = input<string>();
 
   protected readonly sending = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -101,7 +107,7 @@ export class LoginComponent {
   }
 
   /** Solo rutas internas: un ?volver=https://... no debe sacar al cliente del portal. */
-  private destino(): string {
+  protected destino(): string {
     const volver = this.volver();
     return volver?.startsWith('/') && !volver.startsWith('//') && !volver.startsWith('/ingresar') ? volver : '/catalogo';
   }

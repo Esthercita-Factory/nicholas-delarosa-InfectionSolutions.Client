@@ -7,6 +7,8 @@ import { AuthService } from '../../Services/auth.service';
 import { ToastService } from '../../Services/toast.service';
 import { IconComponent } from '../Shared/Icon.Component';
 import { AuthLayoutComponent } from './AuthLayout.Component';
+import { PASSWORD_RULES, politica } from './password-rules';
+import { SocialLoginComponent } from './SocialLogin.Component';
 
 type Campo = 'document' | 'fullName' | 'age' | 'email' | 'phone' | 'address' | 'password' | 'confirmPassword';
 
@@ -22,18 +24,6 @@ const MENSAJES: Record<Campo, Record<string, string>> = {
   confirmPassword: { required: 'Confirma la contraseña.', distinta: 'Las contraseñas no coinciden.' }
 };
 
-/** La politica de Identity en Infrastructure: 8+, mayuscula, numero y simbolo. */
-export const PASSWORD_RULES = [
-  { label: '8 caracteres o más', test: (v: string) => v.length >= 8 },
-  { label: 'Una mayúscula', test: (v: string) => /[A-ZÁÉÍÓÚÑ]/.test(v) },
-  { label: 'Un número', test: (v: string) => /\d/.test(v) },
-  { label: 'Un símbolo (* ! # …)', test: (v: string) => /[^A-Za-z0-9ÁÉÍÓÚÑáéíóúñ]/.test(v) }
-] as const;
-
-function politica(control: AbstractControl): ValidationErrors | null {
-  const valor = String(control.value ?? '');
-  return valor && !PASSWORD_RULES.every((regla) => regla.test(valor)) ? { politica: true } : null;
-}
 
 /** Validador del grupo: el error queda en el formulario y se muestra en "Confirmar contraseña". */
 function coinciden(grupo: AbstractControl): ValidationErrors | null {
@@ -43,7 +33,7 @@ function coinciden(grupo: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, AuthLayoutComponent, IconComponent],
+  imports: [ReactiveFormsModule, RouterLink, AuthLayoutComponent, IconComponent, SocialLoginComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-auth-layout>
@@ -113,6 +103,8 @@ function coinciden(grupo: AbstractControl): ValidationErrors | null {
           @if (sending()) { <span class="spinner" aria-hidden="true"></span> Creando tu cuenta… } @else { Crear cuenta <app-icon name="arrowRight" [size]="18" /> }
         </button>
       </form>
+
+      <app-social-login leyenda="o regístrate con" />
 
       <p class="form-switch">¿Ya tienes cuenta? <a routerLink="/ingresar">Ingresa</a></p>
     </app-auth-layout>

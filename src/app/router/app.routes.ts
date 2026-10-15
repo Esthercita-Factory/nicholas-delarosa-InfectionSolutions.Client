@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard } from '../Guards/auth.guard';
+import { authGuard, guestGuard, profileGuard } from '../Guards/auth.guard';
 
 /**
  * Solo pantallas del rol Cliente: registro, ingreso, catalogo, carrito y
@@ -20,6 +20,30 @@ export const routes: Routes = [
     loadComponent: () => import('../Views/Auth/Register.Component').then(m => m.RegisterComponent),
     canActivate: [guestGuard],
     title: 'Crear cuenta · InfectionSolutions'
+  },
+  {
+    path: 'recuperar',
+    loadComponent: () => import('../Views/Auth/Recover.Component').then(m => m.RecoverComponent),
+    canActivate: [guestGuard],
+    title: 'Recuperar contraseña · InfectionSolutions'
+  },
+  {
+    // Enlace del correo: ?email=&token=
+    path: 'restablecer',
+    loadComponent: () => import('../Views/Auth/ResetPassword.Component').then(m => m.ResetPasswordComponent),
+    title: 'Nueva contraseña · InfectionSolutions'
+  },
+  {
+    // Vuelta de Google/GitHub: #codigo=&volver=
+    path: 'ingresar/externo',
+    loadComponent: () => import('../Views/Auth/ExternalCallback.Component').then(m => m.ExternalCallbackComponent),
+    title: 'Ingresando · InfectionSolutions'
+  },
+  {
+    path: 'completar-datos',
+    loadComponent: () => import('../Views/Auth/CompleteProfile.Component').then(m => m.CompleteProfileComponent),
+    canActivate: [profileGuard],
+    title: 'Completa tus datos · InfectionSolutions'
   },
   {
     path: '',

@@ -259,6 +259,29 @@ button { cursor: pointer; }
 .form-switch { margin-top: 22px; text-align: center; color: var(--acero); }
 .form-switch a { color: var(--grafito); font-weight: 600; text-underline-offset: 3px; }
 
+/* Enlaces y botones-enlace secundarios de los formularios de acceso. */
+.form-link { justify-self: end; margin-top: -8px; font-size: 13px; font-weight: 600; color: var(--acero); text-underline-offset: 3px; }
+.form-link:hover { color: var(--grafito); }
+.link-btn { padding: 0; border: 0; background: none; font: inherit; font-weight: 600; color: var(--grafito); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+/* Continuar con Google / GitHub. */
+.social { margin-top: 22px; }
+.social__divider { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 13px; color: var(--acero); }
+.social__divider::before, .social__divider::after { content: ''; flex: 1; height: 1px; background: var(--linea); }
+.social__buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.social__btn { gap: 10px; text-decoration: none; }
+
+/* Correo de recuperacion enviado. */
+.sent { display: grid; justify-items: start; gap: 10px; margin-top: 18px; padding: 20px; border: 1px solid var(--linea); border-radius: var(--radio); background: var(--papel-2); }
+.sent__icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--bulto-suave); color: var(--bulto-tinta); }
+
+/* Cuenta de Google/GitHub con la que se completan los datos. */
+.account-chip { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 6px 12px; border-radius: 999px; background: var(--papel-2); font-size: 13px; font-weight: 600; }
+
+/* Vuelta de Google/GitHub mientras se cambia el codigo por la sesion. */
+.callback { display: grid; place-items: center; gap: 14px; min-height: 100dvh; color: var(--acero); }
+.spinner--dark { width: 28px; height: 28px; border-color: var(--linea); border-top-color: var(--grafito); }
+
 .notice {
   display: flex; gap: 10px; align-items: flex-start;
   margin-top: 18px; padding: 12px 14px; border-radius: 10px; font-size: 14px;
@@ -714,6 +737,7 @@ app-product-card {
   .auth__theme { top: 24px; right: 16px; }
   /* El titulo del formulario no corre por debajo del boton de tema. */
   .auth__card .form-title { padding-right: 52px; }
+  .social__buttons { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 720px) {

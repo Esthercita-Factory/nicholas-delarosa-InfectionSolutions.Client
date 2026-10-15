@@ -59,6 +59,25 @@ export interface RegisterRequest {
   confirmPassword: string;
 }
 
+export interface ResetPasswordRequest {
+  email: string;
+  token: string;
+  password: string;
+  confirmPassword: string;
+}
+
+/** Lo que falta para la ficha de cliente de una cuenta creada con Google o GitHub (el correo es el de la cuenta). */
+export interface CompleteProfileRequest {
+  document: string;
+  fullName: string;
+  age: number | null;
+  phone: string;
+  address: string | null;
+}
+
+/** Proveedores de inicio de sesion que la API tiene configurados. */
+export type ExternalProvider = 'Google' | 'GitHub';
+
 export interface Product {
   id: string;
   sku: string;

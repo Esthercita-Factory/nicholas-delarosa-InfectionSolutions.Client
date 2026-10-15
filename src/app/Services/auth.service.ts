@@ -2,7 +2,16 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, map, tap } from 'rxjs';
-import { AuthResponse, CUSTOMER_ROLE, LoginRequest, RegisterRequest, UserProfile } from '../Models/api.models';
+import {
+  AuthResponse,
+  CUSTOMER_ROLE,
+  CompleteProfileRequest,
+  ExternalProvider,
+  LoginRequest,
+  RegisterRequest,
+  ResetPasswordRequest,
+  UserProfile
+} from '../Models/api.models';
 import { API_URL } from './api.config';
 import { storage } from './storage';
 
@@ -35,6 +44,8 @@ export class AuthService {
 
   readonly user = computed(() => this.session()?.user ?? null);
   readonly isAuthenticated = computed(() => this.session() !== null);
+  /** Cuenta creada con Google o GitHub que aun no tiene ficha de cliente (documento, edad, telefono). */
+  readonly needsProfile = computed(() => this.session() !== null && !this.session()!.user.customer);
   readonly firstName = computed(() => this.user()?.fullName.split(' ').find(Boolean) ?? '');
   readonly initials = computed(() =>
     (this.user()?.fullName ?? '')
@@ -68,6 +79,45 @@ export class AuthService {
 
   register(request: RegisterRequest): Observable<UserProfile> {
     return this.http.post<AuthResponse>(`${API_URL}/auth/register`, request).pipe(
+      map((respuesta) => this.accept(respuesta))
+    );
+  }
+
+  /** "Olvide mi contraseña": la API responde igual exista o no la cuenta. */
+  forgotPassword(email: string): Observable<void> {
+    return this.http.post<void>(`${API_URL}/auth/forgot-password`, { email });
+  }
+
+  /** Cambia la contraseña con el enlace del correo y deja la sesion iniciada. */
+  resetPassword(request: ResetPasswordRequest): Observable<UserProfile> {
+    return this.http.post<AuthResponse>(`${API_URL}/auth/reset-password`, request).pipe(
+      map((respuesta) => this.accept(respuesta))
+    );
+  }
+
+  /** Proveedores externos que la API tiene configurados (los demas botones no se muestran). */
+  externalProviders(): Observable<ExternalProvider[]> {
+    return this.http.get<ExternalProvider[]>(`${API_URL}/auth/external/providers`);
+  }
+
+  /**
+   * Direccion para empezar el inicio con Google o GitHub. Se abre con el navegador (no con
+   * HttpClient): la API redirige al proveedor y luego vuelve a /ingresar/externo con un codigo.
+   */
+  externalLoginUrl(provider: ExternalProvider, returnUrl = '/catalogo'): string {
+    return `${API_URL}/auth/external/${provider.toLowerCase()}?returnUrl=${encodeURIComponent(returnUrl)}`;
+  }
+
+  /** Cambia el codigo de un solo uso que dejo Google/GitHub por la sesion. */
+  exchangeExternalCode(code: string): Observable<UserProfile> {
+    return this.http.post<AuthResponse>(`${API_URL}/auth/external/exchange`, { code }).pipe(
+      map((respuesta) => this.accept(respuesta))
+    );
+  }
+
+  /** Crea la ficha de cliente de una cuenta de Google/GitHub; la sesion queda con la ficha. */
+  completeProfile(request: CompleteProfileRequest): Observable<UserProfile> {
+    return this.http.post<AuthResponse>(`${API_URL}/auth/complete-profile`, request).pipe(
       map((respuesta) => this.accept(respuesta))
     );
   }

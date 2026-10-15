@@ -64,6 +64,12 @@ Puntajes de Lighthouse (móvil y escritorio) por encima de 90 en ingreso y catá
 
 ## Qué hace
 
+- **Recuperar contraseña** (`/recuperar` → correo → `/restablecer?email=&token=`): nueva contraseña con el
+  mismo indicador de requisitos del registro, y la sesión queda iniciada.
+- **Google y GitHub**: botones en el ingreso y el registro (solo los que la API tiene configurados,
+  `GET /api/auth/external/providers`). La API vuelve a `/ingresar/externo#codigo=…`, el portal cambia el
+  código por el token y, si la cuenta es nueva, pide los datos que faltan en `/completar-datos` (el guard no
+  deja entrar al catálogo hasta completarlos).
 - **Registro e ingreso** (`/registro`, `/ingresar`). El registro repite las validaciones de la API (documento,
   edad, teléfono, política de contraseña con indicador en vivo) y muestra junto a cada campo los errores que
   devuelve la API, como un documento ya registrado. Una cuenta de administrador no puede entrar al portal.

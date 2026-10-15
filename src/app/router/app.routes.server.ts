@@ -8,5 +8,6 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 export const serverRoutes: ServerRoute[] = [
   { path: 'ingresar', renderMode: RenderMode.Prerender },
   { path: 'registro', renderMode: RenderMode.Prerender },
+  { path: 'recuperar', renderMode: RenderMode.Prerender },
   { path: '**', renderMode: RenderMode.Client }
 ];
